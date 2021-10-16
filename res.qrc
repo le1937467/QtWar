@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/img">
+        <file>Images/bg.jfif</file>
+        <file>Images/Cards/back.png</file>
+    </qresource>
+</RCC>
