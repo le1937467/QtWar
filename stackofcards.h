@@ -14,6 +14,7 @@ private:
     CardWidget *card3;
 public:
     StackOfCards(float x, float y, QGraphicsScene *graphScene, Helper *helper, Card *card);
+    void setOnClickEvent(void (*event)());
     ~StackOfCards();
 };
 

@@ -9,6 +9,24 @@ MainWindow::MainWindow(QWidget *parent)
     helper = new Helper(this);
     LoadCards();
     SetupUI();
+
+    //Singleton
+    if(!instance)
+        instance = this;
+    else{
+        delete instance;
+        instance = this;
+    }
+}
+
+//Makes this a singleton to be available to onClick static methods
+MainWindow* MainWindow::getInstance()
+{
+    if(instance)
+        return instance;
+    else{
+        throw new QException(); //Error, instance not found
+    }
 }
 
 void MainWindow::SetupUI()
@@ -59,6 +77,40 @@ void MainWindow::CreateFaceDownStackOfCards(float x, float y, QString ref){
     stacks[ref] = new StackOfCards(x, y, graphScene,helper,allCards[0]);
 }
 
+void MainWindow::DealCards(){
+    QList<Card*> copyOfAllCards = allCards;
+    int halfLen = allCards.size()/2; //26
+    ShuffleDeck(&copyOfAllCards);
+    myCards = allCards.mid(0, halfLen);
+    compCards = allCards.mid(halfLen);
+}
+
+void MainWindow::ShuffleDeck(QList<Card*> *deck){
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(deck->begin(), deck->end(), g);
+}
+
+Card MainWindow::PopCardFromDeck(QList<Card*> deck){
+    Card card = *deck[0];
+    deck.remove(0);
+    return card;
+}
+
+void MainWindow::DeckClick(){
+
+    MainWindow *mw = MainWindow::getInstance(); //Get instance from static context
+    Card myCard = mw->PopCardFromDeck(mw->myCards);
+    Card compCard = mw->PopCardFromDeck(mw->compCards);
+    mw->myCardWidget = new CardWidget(myCard);
+    mw->myCardWidget->setPos(mw->helper->getDynamicSize(mw->myCardWidget->boundingRect().size(), 50, 40));
+    mw->compCardWidget = new CardWidget(compCard);
+    mw->compCardWidget->setPos(mw->helper->getDynamicSize(mw->compCardWidget->boundingRect().size(), 50, 60));
+    mw->graphScene->addItem(mw->myCardWidget);
+    mw->graphScene->addItem(mw->compCardWidget);
+
+}
+
 void MainWindow::ChangeState(GameState gameState){
     switch(gameState){
     case GameState::PreDeal:
@@ -67,19 +119,24 @@ void MainWindow::ChangeState(GameState gameState){
         dealButton->setFont(QFont("times", 18));
         dealButton->setGeometry(0,0, 150,50);   //Need to reset x,y. Then resize. Then move.
         dealButton->move(helper->getDynamicSize(dealButton->size(), 60, 50).toPoint());
-        dealButton->connect(dealButton, &QPushButton::clicked, [this](){
+        connect(dealButton, &QPushButton::clicked, [this](){
             ChangeState(GameState::Start);
         });
         graphScene->addWidget(dealButton);
+
         break;
     case GameState::Start:
         dealButton->setVisible(false);
         delete stacks["deal_stack"];
-        //Computer's stack of cards
+        //Creating the stacks of cards
         CreateFaceDownStackOfCards(22,0, "computer_cards");
-
-        //Your stack of cards
         CreateFaceDownStackOfCards(33,82, "your_cards");
+
+        // Sets the DeckClick() static function to execute when clicking on the stack of cards
+        stacks["your_cards"]->setOnClickEvent(&MainWindow::DeckClick);
+
+        //Dealing and shuffling the cards
+        DealCards();
 
         break;
     case GameState::GameOver:
