@@ -14,6 +14,7 @@ SOURCES += \
     helper.cpp \
     main.cpp \
     mainwindow.cpp \
+    scrolleater.cpp \
     stackofcards.cpp
 
 HEADERS += \
@@ -21,6 +22,7 @@ HEADERS += \
     cardwidget.h \
     helper.h \
     mainwindow.h \
+    scrolleater.h \
     stackofcards.h
 
 FORMS += \

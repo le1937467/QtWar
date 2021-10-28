@@ -2,6 +2,7 @@
 
 CardWidget::CardWidget()
 {
+    this->onClickEvent = nullptr;
     CardWidget(nullptr); //In case we need to do extra setups, we do them all in the same function
 }
 
@@ -12,8 +13,16 @@ CardWidget::CardWidget(Card card)   //Constructor that supports creating by valu
     CardWidget(this->card);
 }
 
+CardWidget::CardWidget(Card card, bool faceDown)   //Constructor that supports creating by value instead of reference
+{
+    this->cardOrigin = card;
+    this->card = &cardOrigin;
+    CardWidget(this->card, faceDown);
+}
+
 CardWidget::CardWidget(Card *card, bool faceDown)
 {
+    this->onClickEvent = nullptr;
     if(card != nullptr){
         this->SetCard(card, faceDown);
     }
@@ -21,7 +30,21 @@ CardWidget::CardWidget(Card *card, bool faceDown)
 
 void CardWidget::SetCard(Card *card, bool faceDown)
 {
-    this->card = card;
+    if(card != nullptr){
+        this->card = card;
+        if(!faceDown)
+            setPixmap(this->card->pixmap);
+        else
+            setPixmap(QPixmap(":/img/Images/Cards/back.png"));
+    }
+    else{
+        setPixmap(QPixmap());
+    }
+}
+
+void CardWidget::SetCard(Card card, bool faceDown)
+{
+    this->card = new Card(card);
     if(!faceDown)
         setPixmap(this->card->pixmap);
     else

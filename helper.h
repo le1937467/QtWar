@@ -4,13 +4,15 @@
 #include <QPointF>
 #include <QSizeF>
 #include <QMainWindow>
+#include <QGuiApplication>
+#include <QScreen>
 
 class Helper
 {
-private:
-    QMainWindow *mw;
 public:
-    Helper(QMainWindow *mw);
+    Helper();
+    QScreen *screen;
+    QScreen* getScreen();
     QPointF getDynamicSize(QSizeF size, float percentX, float percentY); // Helper function to get a position by % of screen
 };
 

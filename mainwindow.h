@@ -20,6 +20,9 @@
 #include <algorithm>
 #include <random>
 #include <QException>
+#include <QThread>
+#include <QApplication>
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -37,7 +40,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow(QApplication *app, QWidget *parent = nullptr);
     QList<Card*> allCards;
     QList<Card*> myCards;
     QList<Card*> compCards;
@@ -51,21 +54,49 @@ private:
     QGraphicsView *graphView;
     QPushButton *dealButton;
     QTextCharFormat format;
+    bool canClickDeck;
+    QApplication *app;
+    Card myCard;
+    int myScore;
+    int compScore;
+    int warScore;
+    bool isInWar;
+    bool endGame;
+    Card compCard;
     QPen outlinePen;
     inline static MainWindow *instance = nullptr;
     static void DeckClick();
     QTextDocument *youDoc;
     QTextDocument *compDoc;
+    QTextDocument *myScoreDoc;
+    QTextDocument *compScoreDoc;
+    QTextDocument *warDoc;
+    QTextDocument *cardLeftDoc;
+    QTextDocument *gameEndDoc;
     CardWidget *myCardWidget;
     CardWidget *compCardWidget;
+    CardWidget *myWonCardsWidget;
+    CardWidget *compWonCardsWidget;
+    QGraphicsTextItem *youScoreText;
+    QGraphicsTextItem *compScoreText;
+    QGraphicsTextItem *warText;
+    QGraphicsTextItem *cardLeftText;
+    QGraphicsTextItem *gameEndText;
+    QTextCursor *compScoreCursor;
+    QTextCursor *yourScoreCursor;
+    QTextCursor *warCursor;
+    QTextCursor *cardLeftCursor;
+    QTextCursor *gameEndCursor;
     QHash<QString, CardWidget*> cardWidgets;
     QHash<QString, StackOfCards*> stacks; //String is used to reference to where the card is for easier deletion.
     void CreateFaceDownStackOfCards(float x, float y, QString ref);  //Creates a stack of card at position x,y in PERCENTAGES
     void LoadCards();
     void SetupUI();
+    void SetValues();
     void DealCards();
+    void UpdateScore();
     void ChangeState(GameState gameState);
     void ShuffleDeck(QList<Card*> *deck);
-    Card PopCardFromDeck(QList<Card*> deck);
+    Card PopCardFromDeck(QList<Card*> *deck);
 };
 #endif // MAINWINDOW_H
