@@ -130,10 +130,8 @@ void MainWindow::SetupUI()
 
     //Cards in the middle
     myCardWidget = new CardWidget(allCards[0]); //Init with card for proper placement using size
-    myCardWidget->setPos(helper->getDynamicSize(myCardWidget->boundingRect().size(), 45, 45));
     myCardWidget->SetCard(nullptr);             //Reset the card since it was only for size
     compCardWidget = new CardWidget(allCards[0]);
-    compCardWidget->setPos(helper->getDynamicSize(compCardWidget->boundingRect().size(), 55, 45));
     compCardWidget->SetCard(nullptr);
     graphScene->addItem(myCardWidget);
     graphScene->addItem(compCardWidget);
@@ -220,11 +218,19 @@ void MainWindow::DeckClick()
         mw->compCardWidget->SetCard(mw->compCard);
 
 
+        mw->myCardWidget->setPos(mw->stacks["your_cards"]->card3->pos());
+        mw->myCardWidget->transitionTo(mw->helper->getDynamicSize(mw->myCardWidget->boundingRect().size(), 45, 45));
+
+        mw->compCardWidget->setPos(mw->stacks["computer_cards"]->card3->pos());
+        mw->compCardWidget->transitionTo(mw->helper->getDynamicSize(mw->compCardWidget->boundingRect().size(), 55, 45));
+
+
         /*
          *   --------Wait a bit and pick the round's winner---------
          */
-        mw->app->processEvents();   //VERY IMPORTANT - Otherwise, UI freezes before changes are processed
-        QThread::sleep(1);          //1s sleep
+
+        //SLEEP WHILE PROCESSING EVENTS
+        mw->helper->delay(1500);
 
 
         int doesPlayerWin = mw->myCard.isBiggerThan(&mw->compCard);
@@ -234,13 +240,21 @@ void MainWindow::DeckClick()
             //COMPUTER WINS ROUND
             if(!mw->isInWar){
                 mw->compScore += 2;
+
+
+                mw->myCardWidget->transitionTo(mw->compWonCardsWidget->pos(), false);
+                mw->compCardWidget->transitionTo(mw->compWonCardsWidget->pos(), false);
+                mw->helper->delay(500);
                 mw->compWonCardsWidget->SetCard(mw->compCard);
             }
             else{
                 mw->compScore += mw->warScore+2;
-                mw->compWonCardsWidget->SetCard(mw->compCard);
                 mw->warText->setVisible(false);
                 mw->isInWar = false;
+                mw->myCardWidget->transitionTo(mw->compWonCardsWidget->pos(), false);
+                mw->compCardWidget->transitionTo(mw->compWonCardsWidget->pos(), false);
+                mw->helper->delay(500);
+                mw->compWonCardsWidget->SetCard(mw->compCard);
             }
         }
         else if(doesPlayerWin == 1)
@@ -248,19 +262,28 @@ void MainWindow::DeckClick()
             //PLAYER WINS ROUND
             if(!mw->isInWar){
                 mw->myScore += 2;
+                mw->myCardWidget->transitionTo(mw->myWonCardsWidget->pos(), false);
+                mw->compCardWidget->transitionTo(mw->myWonCardsWidget->pos(), false);
+                mw->helper->delay(500);
                 mw->myWonCardsWidget->SetCard(mw->myCard);
             }
             else{
                 mw->myScore += mw->warScore+2;
-                mw->myWonCardsWidget->SetCard(mw->myCard);
                 mw->warText->setVisible(false);
                 mw->isInWar = false;
+                mw->myCardWidget->transitionTo(mw->compWonCardsWidget->pos(), false);
+                mw->compCardWidget->transitionTo(mw->compWonCardsWidget->pos(), false);
+                mw->helper->delay(500);
+                mw->myWonCardsWidget->SetCard(mw->myCard);
             }
         }
         else
         {
             //NOBODY WINS ROUND -> START WAR
             if(!mw->isInWar){
+                mw->myCardWidget->transitionTo(mw->warText->pos(), false);
+                mw->compCardWidget->transitionTo(mw->warText->pos(), false);
+                mw->helper->delay(500);
                 mw->warText->setVisible(true);
                 mw->isInWar = true;
                 mw->warScore = 2;
@@ -272,6 +295,9 @@ void MainWindow::DeckClick()
 
         mw->myCardWidget->SetCard(nullptr);     //Reset the pixmaps
         mw->compCardWidget->SetCard(nullptr);
+
+        mw->myCardWidget->setPos(mw->helper->getDynamicSize(mw->myCardWidget->boundingRect().size(), 45, 45));
+        mw->compCardWidget->setPos(mw->helper->getDynamicSize(mw->compCardWidget->boundingRect().size(), 55, 45));
 
         mw->UpdateScore();  //Update the score
         mw->canClickDeck = true;
@@ -299,10 +325,30 @@ void MainWindow::ChangeState(GameState gameState){
     case GameState::Start:
         cardLeftText->setVisible(true);
         dealButton->setVisible(false);
-        delete stacks["deal_stack"];
+
+        stacks["deal_stack"]->transitionTo(helper->getDynamicSize(dealButton->size(), 45, 10),
+                                           helper->getDynamicSize(dealButton->size(), 55, 83),false,100);
+
         //Creating the stacks of cards
         CreateFaceDownStackOfCards(45,10, "computer_cards");
         CreateFaceDownStackOfCards(55,83, "your_cards");
+
+
+        stacks["deal_stack"]->transitionTo(helper->getDynamicSize(dealButton->size(), 45, 10),
+                                           helper->getDynamicSize(dealButton->size(), 55, 83),false,100);
+        stacks["deal_stack"]->transitionTo(helper->getDynamicSize(dealButton->size(), 45, 10),
+                                           helper->getDynamicSize(dealButton->size(), 55, 83),false,100);
+        stacks["deal_stack"]->transitionTo(helper->getDynamicSize(dealButton->size(), 45, 10),
+                                           helper->getDynamicSize(dealButton->size(), 55, 83),false,100);
+        stacks["deal_stack"]->transitionTo(helper->getDynamicSize(dealButton->size(), 45, 10),
+                                           helper->getDynamicSize(dealButton->size(), 55, 83),false,100);
+        stacks["deal_stack"]->transitionTo(helper->getDynamicSize(dealButton->size(), 45, 10),
+                                           helper->getDynamicSize(dealButton->size(), 55, 83),false,100);
+
+
+        delete stacks["deal_stack"];
+
+
 
         // Sets the DeckClick() static function to execute when clicking on the stack of cards
         stacks["your_cards"]->setOnClickEvent(&MainWindow::DeckClick);
